@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Do You Love Me? 💖</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;900&display=swap');
+
+        :root {
+            --primary: #ff758c;
+            --secondary: #ff7eb3;
+            --yes-btn: #4cd137;
+            --yes-glow: rgba(76, 209, 55, 0.6);
+            --no-btn: #ff4757;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: linear-gradient(45deg, #ffb6c1, #e6e6fa, #ffdab9, #ffc0cb);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating Hearts Background */
+        .heart-bg {
+            position: absolute;
+            bottom: -10vh;
+            transform: translateY(0);
+            animation: floatUp linear forwards;
+            opacity: 0.6;
+            z-index: 0;
+            pointer-events: none;
+            font-size: 24px;
+        }
+
+        @keyframes floatUp {
+            to { transform: translateY(-110vh) rotate(360deg); }
+        }
+
+        /* Glassmorphism Containers */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            text-align: center;
+            z-index: 10;
+            width: 90%;
+            max-width: 500px;
+            transition: all 0.5s ease;
+        }
+
+        /* Screens */
+        #main-screen, #success-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #main-screen.active, #success-screen.active {
+            display: flex;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Typography */
+        h1 { color: #333; font-size: 2.2rem; margin-bottom: 10px; }
+        p { color: #555; font-size: 1.1rem; min-height: 30px; }
+        
+        .cute-char { font-size: 4rem; margin: 10px 0; animation: bounce 2s infinite; }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        /* Inputs & Buttons */
+        .btn-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-yes {
+            background: var(--yes-btn);
+            color: white;
+            box-shadow: 0 0 15px var(--yes-glow);
+            z-index: 2;
+        }
+
+        .btn-yes:hover {
+            box-shadow: 0 0 25px var(--yes-glow);
+            transform: scale(1.05);
+        }
+
+        .btn-no {
+            background: var(--no-btn);
+            color: white;
+            z-index: 1;
+        }
+
+        /* Music Toggle */
+        #music-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.3);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            z-index: 10;
+        }
+
+        /* Confetti & Hearts */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="bgm" loop>
+        <source src="https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg" type="audio/ogg">
+    </audio>
+    <audio id="clickSound">
+        <source src="https://actions.google.com/sounds/v1/water/bubble_pop.ogg" type="audio/ogg">
+    </audio>
+    <audio id="successSound">
+        <source src="https://actions.google.com/sounds/v1/human_voices/human_crowd_cheer.ogg" type="audio/ogg">
+    </audio>
+
+    <button id="music-toggle">🔇</button>
+
+    <div id="main-screen" class="glass-card active">
+        <div class="cute-char" id="main-emoji">🥺</div>
+        <h1 id="question-title">Do you love me, Israt Jahan Sinha? 💖</h1>
+        <p id="typewriter-text"></p>
+        
+        <div class="btn-group">
+            <button class="btn-yes" id="btn-yes" onclick="sayYes()">YES</button>
+            <button class="btn-no" id="btn-no" onclick="sayNo()">NO</button>
+        </div>
+    </div>
+
+    <div id="success-screen" class="glass-card">
+        <div class="cute-char">🥰</div>
+        <h1>I Love You Too! ❤️</h1>
+        <p>You've made me the happiest person ever!</p>
+        <div class="cute-char" style="animation: none;">💑</div>
+    </div>
+
+    <div class="footer" id="footer-text">Made with ❤️ by Al Shahriar</div>
+
+    <script>
+        // State Variables
+        let noClickCount = 0;
+        const gfNameStr = "Israt Jahan Sinha";
+        const myNameStr = "Al Shahriar";
+        let isMusicPlaying = false;
+        let isNoButtonAbsolute = false;
+        let audioInitialized = false;
+
+        // Elements
+        const mainScreen = document.getElementById('main-screen');
+        const successScreen = document.getElementById('success-screen');
+        const typeWriterText = document.getElementById('typewriter-text');
+        const btnNo = document.getElementById('btn-no');
+        const btnYes = document.getElementById('btn-yes');
+        const mainEmoji = document.getElementById('main-emoji');
+        const musicToggle = document.getElementById('music-toggle');
+
+        // Audio
+        const bgm = document.getElementById('bgm');
+        const clickSound = document.getElementById('clickSound');
+        const successSound = document.getElementById('successSound');
+
+        // Texts for typing effect
+        const romanticMessages = [
+            "You make my heart smile.",
+            "I've been waiting to ask you this...",
+            "Life is just better with you in it.",
+            "Please say yes? 🥺"
+        ];
+
+        // Progressive responses for the NO button
+        const noResponses = [
+            { text: "No", emoji: "🥺" },
+            { text: "Please?", emoji: "😢" },
+            { text: "Don't do this", emoji: "😭" },
+            { text: "I'll cry...", emoji: "💔" },
+            { text: "Breaking my heart!", emoji: "🤕" },
+            { text: "Are you sure?", emoji: "😟" },
+            { text: "Think again!", emoji: "🤔" },
+            { text: "Last chance!", emoji: "😰" },
+            { text: "Okay I'm mad", emoji: "😡" },
+            { text: "Just kidding, please!", emoji: "🙏" }
+        ];
+
+        // Start animations and typing when the page loads
+        window.onload = () => {
+            startBackgroundHearts();
+            typeWriter(romanticMessages.join(" "));
+        };
+
+        // Initialize audio on first click anywhere on the page
+        document.body.addEventListener('click', () => {
+            if (!audioInitialized) {
+                bgm.volume = 0.3;
+                bgm.play().then(() => {
+                    isMusicPlaying = true;
+                    musicToggle.innerText = "🔊";
+                }).catch(e => console.log("Audio play prevented"));
+                audioInitialized = true;
+            }
+        }, { once: true });
+
+        // --- Audio Controls ---
+        musicToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent body click from firing again
+            toggleMusic();
+        });
+
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                bgm.pause();
+                musicToggle.innerText = "🔇";
+            } else {
+                bgm.play().catch(e => console.log("Audio play prevented"));
+                musicToggle.innerText = "🔊";
+            }
+            isMusicPlaying = !isMusicPlaying;
+        }
+
+        function playClick() {
+            clickSound.currentTime = 0;
+            clickSound.play().catch(e => {});
+        }
+
+        // --- Typing Effect ---
+        let i = 0;
+        let textToType = "";
+        function typeWriter(text) {
+            textToType = text;
+            if (i < textToType.length) {
+                typeWriterText.innerHTML += textToType.charAt(i);
+                i++;
+                setTimeout(() => typeWriter(textToType), 50);
+            }
+        }
+
+        // --- NO Button Logic ---
+        function sayNo() {
+            playClick();
+            noClickCount++;
+
+            // Hidden Surprise for 10+ clicks
+            if (noClickCount >= 10) {
+                alert(`Okay ${gfNameStr}, you are incredibly stubborn! 😂 But I love you anyway. The 'NO' button has been confiscated!`);
+                btnNo.style.display = 'none';
+                mainEmoji.innerText = "😤";
+                return;
+            }
+
+            // Update text and emoji
+            const response = noResponses[Math.min(noClickCount, noResponses.length - 1)];
+            btnNo.innerText = response.text;
+            mainEmoji.innerText = response.emoji;
+
+            // Make YES button grow bigger
+            let scaleYes = 1 + (noClickCount * 0.2);
+            btnYes.style.transform = `scale(${scaleYes})`;
+
+            // Dodge logic: Make button run away after 3 clicks
+            if (noClickCount >= 3) {
+                if (!isNoButtonAbsolute) {
+                    btnNo.style.position = 'absolute';
+                    isNoButtonAbsolute = true;
+                }
+                
+                // Calculate safe boundaries
+                const maxX = window.innerWidth - btnNo.offsetWidth - 20;
+                const maxY = window.innerHeight - btnNo.offsetHeight - 20;
+                
+                const randomX = Math.floor(Math.random() * maxX);
+                const randomY = Math.floor(Math.random() * maxY);
+
+                btnNo.style.left = randomX + 'px';
+                btnNo.style.top = randomY + 'px';
+            }
+        }
+
+        // --- YES Button Logic ---
+        function sayYes() {
+            bgm.pause();
+            musicToggle.style.display = 'none'; // hide music toggle on success
+            successSound.volume = 0.5;
+            successSound.play().catch(e=>{});
+            
+            mainScreen.classList.remove('active');
+            successScreen.classList.add('active');
+            
+            triggerConfetti();
+            triggerHeartExplosion();
+        }
+
+        // --- Background Animations ---
+        function startBackgroundHearts() {
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('heart-bg');
+                heart.innerHTML = ['💖', '💕', '💘', '💗', '💓'][Math.floor(Math.random() * 5)];
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 3 + 4) + 's'; // 4s to 7s
+                heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                
+                document.body.appendChild(heart);
+                
+                // Remove heart after animation ends
+                setTimeout(() => {
+                    heart.remove();
+                }, 7000);
+            }, 300); // New heart every 300ms
+        }
+
+        // --- Confetti Generation ---
+        function triggerConfetti() {
+            const colors = ['#ff758c', '#4cd137', '#ffda79', '#00a8ff', '#9c88ff'];
+            for (let j = 0; j < 100; j++) {
+                createParticle(colors[Math.floor(Math.random() * colors.length)], 'square');
+            }
+        }
+
+        function triggerHeartExplosion() {
+            for (let j = 0; j < 50; j++) {
+                setTimeout(() => {
+                    createParticle('transparent', 'heart');
+                }, j * 20);
+            }
+        }
+
+        function createParticle(color, type) {
+            const particle = document.createElement('div');
+            particle.classList.add('confetti');
+            
+            if (type === 'heart') {
+                particle.innerHTML = '❤️';
+                particle.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            } else {
+                particle.style.backgroundColor = color;
+                particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+            }
+
+            // Starting position (center)
+            particle.style.left = '50vw';
+            particle.style.top = '50vh';
+
+            document.body.appendChild(particle);
+
+            // Random destination
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 100 + Math.random() * 200;
+            const tx = Math.cos(angle) * velocity;
+            const ty = Math.sin(angle) * velocity - 100; // slight upward bias
+
+            // Animate using Web Animations API
+            particle.animate([
+                { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+                { transform: `translate(${tx}px, ${ty}px) rotate(${Math.random()*360}deg)`, opacity: 0 }
+            ], {
+                duration: 1000 + Math.random() * 1000,
+                easing: 'cubic-bezier(0, .9, .57, 1)'
+            }).onfinish = () => particle.remove();
+        }
+    </script>
+</body>
+</html>
